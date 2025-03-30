@@ -120,7 +120,7 @@ fun WeatherScreen(
                         TextField(
                             value = searchQuery,
                             onValueChange = { newValue -> searchQuery = newValue },
-                            label = { Text("Search Location", color = Color.White.copy(alpha = 0.8f)) },
+                            label = { Text("Busca de localização", color = Color.White.copy(alpha = 0.8f)) },
                             trailingIcon = {
                                 IconButton(onClick = { focusManager.clearFocus() }) {
                                     Icon(
@@ -171,7 +171,7 @@ fun WeatherScreen(
                                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                                         if (filteredLocations.isEmpty() && searchQuery.isNotEmpty()) {
                                             DropdownMenuItem(
-                                                text = { Text("No results found", color = Color.White.copy(alpha = 0.7f)) },
+                                                text = { Text("Sem resultados", color = Color.White.copy(alpha = 0.7f)) },
                                                 enabled = false,
                                                 onClick = {},
                                             )
@@ -198,7 +198,7 @@ fun WeatherScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Search History",
+                        text = "Histórico de Busca",
                         color = Color.White,
                         style = MaterialTheme.typography.titleSmall
                     )
@@ -373,12 +373,23 @@ fun WeatherScreen(
                             icon = Icons.Default.WbSunny
                         )
 
-                        // Air Quality Card (Placeholder)
-                        InfoCard(
-                            label = "Qualidade do Ar",
-                            value = "Boa",
-                            icon = Icons.Default.FilterDrama
-                        )
+                        // Air Quality Card
+                        weatherInfo.airQuality?.list?.get(0)?.main?.aqi?.let { aqi ->
+                            val airQuality = when (aqi) {
+                                1 -> "Bom"
+                                2 -> "Moderado"
+                                3 -> "USG"
+                                4 -> "Nocivo"
+                                5 -> "Muito Nocivo"
+                                else -> "Desconhecido"
+                            }
+
+                            InfoCard(
+                                label = "Qualidade do ar",
+                                value = airQuality,
+                                icon = Icons.Default.FilterDrama
+                            )
+                        }
                     }
                     // --- INFO CARDS END ---
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.apptrabalho2_metereologia.R
 import com.example.apptrabalho2_metereologia.data.remote.RemoteDataSource
+import com.example.apptrabalho2_metereologia.data.remote.response.AirQualityResponse
 import com.example.apptrabalho2_metereologia.data.remote.response.ForecastResponse
 import com.example.apptrabalho2_metereologia.data.remote.response.WeatherDataResponse
 import io.ktor.client.HttpClient
@@ -24,7 +25,7 @@ class KtorRemoteDataSource @Inject constructor(
     override suspend fun getWeatherDataResponse(lat: Float, lng: Float): WeatherDataResponse {
         val weatherUrl = "$baseUrl/weather?lat=$lat&lon=$lng&units=metric&appid=$apiKey"
         val forecastUrl = "$baseUrl/forecast?lat=$lat&lon=$lng&units=metric&appid=$apiKey"
-        
+        val airQualityUrl = "$baseUrl/air_pollution?lat=$lat&lon=$lng&appid=$apiKey"
         Log.d("WeatherAPI", "Fazendo requisição para: $weatherUrl")
         Log.d("WeatherAPI", "Fazendo requisição para previsão: $forecastUrl")
 
@@ -36,9 +37,10 @@ class KtorRemoteDataSource @Inject constructor(
             val forecastResponse = httpClient.get {
                 url(forecastUrl)
             }.body<ForecastResponse>()
-
+            val airQualityResponse = httpClient.get { url(airQualityUrl) }.body<AirQualityResponse>()
             // Atualiza a resposta do tempo atual com a previsão horária
             weatherResponse.copy(
+                airQuality = airQualityResponse,
                 hourlyForecast = forecastResponse.list.take(6)
             )
         } catch (e: Exception) {
