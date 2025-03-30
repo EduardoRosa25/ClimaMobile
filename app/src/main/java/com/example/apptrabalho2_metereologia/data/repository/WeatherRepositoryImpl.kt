@@ -37,26 +37,28 @@ class WeatherRepositoryImpl @Inject constructor(
                 forecastDateTime.hour to forecast
             }
             
-            (currentHour + 1..23).mapNotNull { hour ->
-                forecastMap[hour]?.let { forecast ->
+            (currentHour + 1 until currentHour + 25).mapNotNull { hour ->
+                val adjustedHour = hour % 24
+                forecastMap[adjustedHour]?.let { forecast ->
                     HourlyForecast(
-                        time = String.format("%02d:00", hour),
+                        time = String.format("%02d:00", adjustedHour),
                         temperature = forecast.main.temp.toInt(),
-                        conditionIcon = adjustIconForTime(forecast.weather[0].icon, hour),
+                        conditionIcon = adjustIconForTime(forecast.weather[0].icon, adjustedHour),
                         condition = forecast.weather[0].main
                     )
                 } ?: HourlyForecast(
-                    time = String.format("%02d:00", hour),
+                    time = String.format("%02d:00", adjustedHour),
                     temperature = response.main.temp.toInt(),
-                    conditionIcon = adjustIconForTime(weather.icon, hour),
+                    conditionIcon = adjustIconForTime(weather.icon, adjustedHour),
                     condition = weather.main
                 )
             }
-        } ?: (currentHour + 1..23).map { hour ->
+        } ?: (currentHour + 1 until currentHour + 25).map { hour ->
+            val adjustedHour = hour % 24
             HourlyForecast(
-                time = String.format("%02d:00", hour),
+                time = String.format("%02d:00", adjustedHour),
                 temperature = response.main.temp.toInt(),
-                conditionIcon = adjustIconForTime(weather.icon, hour),
+                conditionIcon = adjustIconForTime(weather.icon, adjustedHour),
                 condition = weather.main
             )
         }
