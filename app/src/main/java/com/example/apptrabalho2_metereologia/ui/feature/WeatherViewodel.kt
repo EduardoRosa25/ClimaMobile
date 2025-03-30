@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.apptrabalho2_metereologia.data.remote.RemoteDataSource
 import com.example.apptrabalho2_metereologia.data.repository.WeatherRepository
 import com.example.apptrabalho2_metereologia.utils.LocationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,11 +18,16 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewodel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val application: Application
+    private val application: Application,
 ) : ViewModel() {
 
     private val _weatherInfoState = MutableStateFlow(WeatherInfoState())
     val weatherInfoState: StateFlow<WeatherInfoState> = _weatherInfoState.asStateFlow()
+    private val _customLocation = MutableStateFlow<Pair<Float?, Float?>?>(null)
+    fun updateLocation(coordinates: Pair<Float?, Float?>) {
+        _customLocation.value = coordinates
+        getWeatherInfo()
+    }
 
     init {
         Log.d("WeatherViewModel", "Inicializando ViewModel")
@@ -36,8 +42,8 @@ class WeatherViewodel @Inject constructor(
                 val location = locationHelper.getCurrentLocation()
                 if (location != null) {
                     Log.d("WeatherViewModel", "Localização obtida: ${location.latitude}, ${location.longitude}")
-                    val latitude = location.latitude.toFloat()
-                    val longitude = location.longitude.toFloat()
+                    val latitude = _customLocation.value?.first ?: location.latitude.toFloat()
+                    val longitude = _customLocation.value?.second ?: location.longitude.toFloat()
                     val weatherInfo = weatherRepository.getWeatherData(latitude, longitude)
                     Log.d("WeatherViewModel", "Dados do clima obtidos: $weatherInfo")
                     _weatherInfoState.update {

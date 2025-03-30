@@ -6,29 +6,44 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +54,8 @@ import com.example.apptrabalho2_metereologia.data.model.HourlyForecast
 import com.example.apptrabalho2_metereologia.data.model.WeatherInfo
 import com.example.apptrabalho2_metereologia.ui.theme.AppTrabalho2MetereologiaTheme
 import com.example.apptrabalho2_metereologia.ui.theme.BlueSky
+import com.example.apptrabalho2_metereologia.data.locations
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 fun WeatherRoute(
@@ -48,12 +65,20 @@ fun WeatherRoute(
     WeatherScreen(weatherInfo = weatherInfo.weatherInfo)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DiscouragedApi")
 @Composable
 fun WeatherScreen(
+    viewModel: WeatherViewodel = viewModel(),
     context: Context = LocalContext.current,
     weatherInfo: WeatherInfo?,
 ){
+    var selectedLocation by remember { mutableStateOf(locations[0]) }
+    var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredLocations = locations.filter { it.first.contains(searchQuery, ignoreCase = true) }
+    val focusManager = LocalFocusManager.current
+
     weatherInfo?.let {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -73,7 +98,82 @@ fun WeatherScreen(
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Cabeçalho
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxWidth(),
+                    )  {
+                        TextField(
+                            modifier = Modifier
+                                .width(maxWidth),
+                            value = searchQuery,
+                            label = { Text("Search Location", color = Color.White) },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    expanded = !expanded
+                                    focusManager.clearFocus()
+                                }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search, // Search icon from Material Icons
+                                        contentDescription = "Search Icon",
+                                        tint = Color.White
+                                    )
+                                }
+                            },
+                            textStyle = TextStyle(color = Color.White),
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                                focusedContainerColor = if (weatherInfo.isDay) {
+                                    BlueSky
+                                } else Color.DarkGray,
+                                unfocusedContainerColor = if (weatherInfo.isDay) {
+                                    BlueSky
+                                } else Color.DarkGray,
+                                focusedTrailingIconColor = Color.White,
+                                unfocusedTrailingIconColor = Color.White
+                            ),
+                            onValueChange = {
+                                searchQuery = it
+                            }
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier
+                                .background(
+                                    if (weatherInfo.isDay) {
+                                        BlueSky
+                                    } else Color.DarkGray
+                                )
+                                .heightIn(max = 400.dp)
+                                .width(maxWidth)
+                        ) {
+                            filteredLocations.forEach { (city, coordinates) ->
+                                DropdownMenuItem(
+                                    text = { Text(city, color = Color.White) },
+                                    onClick = {
+                                        selectedLocation = city to coordinates
+                                        expanded = false
+                                        viewModel.updateLocation(coordinates)
+                                        searchQuery = city
+                                    },
+                                    modifier = Modifier.background(
+                                        if (weatherInfo.isDay) {
+                                            BlueSky
+                                        } else Color.DarkGray
+                                    )
+                                )
+                            }
+                            if (filteredLocations.isEmpty()) {
+                                DropdownMenuItem(
+                                    text = { Text("No results", color = Color.White) },
+                                    enabled = false,
+                                    onClick = {},
+                                )
+                            }
+                        }
+
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = weatherInfo.locationName,
                         color = Color.White,
@@ -137,7 +237,7 @@ fun WeatherScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Previsão até o fim do dia",
+                            text = "Forecast for the next hours",
                             color = Color.White,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
@@ -171,6 +271,7 @@ fun HourlyForecastItem(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.width(56.dp)
     ) {
+
         Text(
             text = forecast.time,
             color = Color.White,
