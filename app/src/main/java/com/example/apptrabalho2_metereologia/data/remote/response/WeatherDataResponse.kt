@@ -12,6 +12,8 @@ data class WeatherDataResponse(
     val visibility: Int,
     val wind: Wind,
     val rain: Rain? = null,
+    val temp_max: Double? = null,
+    val temp_min: Double? = null,
     val clouds: Clouds,
     val dt: Long,
     val sys: Sys? = null,

@@ -175,10 +175,8 @@ fun WeatherScreen(
                                                 DropdownMenuItem(
                                                     text = { Text(city, color = Color.White) },
                                                     onClick = {
-                                                        // --- INÍCIO MODIFICAÇÃO ---
                                                         // Limpa a busca em vez de preencher com a cidade
                                                         searchQuery = ""
-                                                        // --- FIM MODIFICAÇÃO ---
                                                         expanded = false // Fecha o popup
                                                         coordinates?.let { nonNullCoords ->
                                                             viewModel.updateLocation(city, nonNullCoords)
@@ -194,14 +192,17 @@ fun WeatherScreen(
                         }
                     } // Fim Box TextField+Popup
 
-                    // ... Restante do código inalterado ...
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Search History",
                         color = Color.White,
+                        style = MaterialTheme.typography.titleSmall // Um pouco menor
                     )
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.Center // Centraliza os botões
+                    ) {
+                        //Spacer(modifier = Modifier.height(8.dp)) // Removido para alinhar melhor
                         cityHistory.take(3).forEach { city ->
                             Button(
                                 onClick = {
@@ -213,22 +214,23 @@ fun WeatherScreen(
                                 },
                                 modifier = Modifier
                                     .padding(horizontal = 4.dp)
-                                    .widthIn(max = 120.dp),
+                                    .widthIn(max = 120.dp), // Limita largura máxima
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp), // Padding interno menor
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0x40000000)
+                                    containerColor = Color(0x40000000) // Fundo semi-transparente
                                 ),
                             ) {
                                 Text(
                                     text = city.cityName,
                                     color = Color.White,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    fontSize = 12.sp
+                                    overflow = TextOverflow.Ellipsis, // Adiciona '...' se não couber
+                                    fontSize = 12.sp // Tamanho da fonte
                                 )
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp)) // Espaço antes do nome da cidade
                     Text(
                         text = weatherInfo.locationName,
                         color = Color.White,
@@ -247,16 +249,16 @@ fun WeatherScreen(
                     Spacer(modifier = Modifier.height(32.dp))
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp) // Espaço entre os itens
                     ) {
                         val iconDrawableResId: Int = try {
                             context.resources.getIdentifier(
                                 "weather_${weatherInfo.conditionIcon}",
                                 "drawable",
                                 context.packageName
-                            ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground
+                            ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground // Fallback icon
                         } catch (e: Exception) {
-                            R.drawable.ic_launcher_foreground
+                            R.drawable.ic_launcher_foreground // Fallback icon em caso de erro
                         }
                         Image(
                             painter = painterResource(id = iconDrawableResId),
@@ -276,13 +278,31 @@ fun WeatherScreen(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
+                        // --- INÍCIO DA MODIFICAÇÃO ---
+                        // Adiciona Row para Max e Min
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp), // Espaço entre Max e Min
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Min: ${weatherInfo.minTemperature}°",
+                                color = Color.White.copy(alpha = 0.9f), // Um pouco menos opaco que a temp principal
+                                style = MaterialTheme.typography.titleMedium // Tamanho médio
+                            )
+                            Text(
+                                text = "Max: ${weatherInfo.maxTemperature}°",
+                                color = Color.White.copy(alpha = 0.9f),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        // --- FIM DA MODIFICAÇÃO ---
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(32.dp)) // Espaço antes da previsão
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x40000000))
+                            .clip(RoundedCornerShape(12.dp)) // Cantos arredondados
+                            .background(Color(0x40000000)) // Fundo semi-transparente
                             .padding(16.dp)
                     ) {
                         Text(
@@ -290,10 +310,10 @@ fun WeatherScreen(
                             color = Color.White,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 16.dp) // Espaço abaixo do título
                         )
                         LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(24.dp), // Espaço entre itens da previsão
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(weatherInfo.hourlyForecasts) { forecast ->
@@ -301,10 +321,11 @@ fun WeatherScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f)) // Empurra tudo para cima
                 }
             } else {
-                Text("Loading weather data...", color = Color.White)
+                // Mostra um indicador de carregamento enquanto weatherInfo é nulo
+                CircularProgressIndicator(color = Color.White)
             }
         }
     }
@@ -313,11 +334,11 @@ fun WeatherScreen(
 
 @Composable
 fun HourlyForecastItem(forecast: HourlyForecast, context: Context) {
-    // Sem alterações
+    // Sem alterações aqui, apenas garantindo que o contexto é passado corretamente
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.width(56.dp)
+        modifier = Modifier.width(56.dp) // Largura fixa para cada item da previsão
     ) {
         Text(
             text = forecast.time,
@@ -330,14 +351,14 @@ fun HourlyForecastItem(forecast: HourlyForecast, context: Context) {
                 "weather_${forecast.conditionIcon}",
                 "drawable",
                 context.packageName
-            ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground
+            ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground // Fallback
         } catch (e: Exception) {
-            R.drawable.ic_launcher_foreground
+            R.drawable.ic_launcher_foreground // Fallback em erro
         }
         Image(
             painter = painterResource(id = iconDrawableResId),
             contentDescription = forecast.condition,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(32.dp) // Tamanho do ícone da previsão
         )
         Text(
             text = "${forecast.temperature}°",
@@ -348,5 +369,3 @@ fun HourlyForecastItem(forecast: HourlyForecast, context: Context) {
         )
     }
 }
-
-

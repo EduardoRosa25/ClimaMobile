@@ -70,7 +70,9 @@ class WeatherRepositoryImpl @Inject constructor(
             temperature = response.main.temp.toInt(),
             dayOfWeek = now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
             isDay = isDayTime(currentHour),
-            hourlyForecasts = hourlyForecasts
+            hourlyForecasts = hourlyForecasts,
+            maxTemperature = response.main.tempMax.toInt(),
+            minTemperature = response.main.tempMin.toInt(),
         )
     }
 }
