@@ -18,7 +18,7 @@ import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.FilterDrama
 import androidx.compose.material.icons.filled.Umbrella
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -366,12 +366,13 @@ fun WeatherScreen(
                             )
                         }
 
-                        // UV Index Card (Placeholder)
-                        InfoCard(
-                            label = "Índice UV",
-                            value = "Alta Insolação",
-                            icon = Icons.Default.WbSunny
-                        )
+                        weatherInfo.feelsLike?.let { feelsLike ->
+                            InfoCard(
+                                label = "Sensação Térmica",
+                                value = "$feelsLike°C",
+                                icon = Icons.Default.Thermostat
+                            )
+                        }
 
                         // Air Quality Card
                         weatherInfo.airQuality?.list?.get(0)?.main?.aqi?.let { aqi ->

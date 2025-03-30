@@ -78,6 +78,7 @@ class WeatherRepositoryImpl @Inject constructor(
             windSpeed = response.wind.speed,
             rainVolumeLastHour = response.rain?.oneHour,
             airQuality = response.airQuality,
+            feelsLike = response.main.feelsLike.toInt()
         )
     }
 }

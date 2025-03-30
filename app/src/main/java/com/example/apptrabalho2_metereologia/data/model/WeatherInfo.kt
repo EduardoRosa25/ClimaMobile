@@ -15,6 +15,7 @@ data class WeatherInfo(
     val humidity: Int,
     val windSpeed: Double,
     val rainVolumeLastHour: Double?,
-    val airQuality: AirQualityResponse? = null
+    val airQuality: AirQualityResponse? = null,
+    val feelsLike: Int,
 
 )
