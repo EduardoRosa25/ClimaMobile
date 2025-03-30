@@ -12,6 +12,8 @@ data class WeatherDataResponse(
     val visibility: Int,
     val wind: Wind,
     val rain: Rain? = null,
+    val temp_max: Double? = null,
+    val temp_min: Double? = null,
     val clouds: Clouds,
     val dt: Long,
     val sys: Sys? = null,
@@ -20,6 +22,7 @@ data class WeatherDataResponse(
     val name: String,
     val cod: Int,
     var hourlyForecast: List<ForecastItem>? = null
+
 )
 
 @Serializable
