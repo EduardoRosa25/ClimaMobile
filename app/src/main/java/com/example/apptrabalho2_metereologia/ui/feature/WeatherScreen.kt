@@ -360,7 +360,7 @@ fun WeatherScreen(
                         // Rain Card (Conditional)
                         weatherInfo.rainVolumeLastHour?.takeIf { it > 0 }?.let { rain ->
                             InfoCard(
-                                label = "Rain (1h)",
+                                label = "Precipitação (1h)",
                                 value = "$rain mm",
                                 icon = Icons.Default.Umbrella
                             )
