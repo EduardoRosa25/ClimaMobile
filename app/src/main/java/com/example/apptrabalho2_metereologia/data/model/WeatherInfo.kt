@@ -10,4 +10,8 @@ data class WeatherInfo(
     val hourlyForecasts: List<HourlyForecast> = emptyList(),
     val maxTemperature: Int,
     val minTemperature: Int,
+    val humidity: Int,
+    val windSpeed: Double,
+    val rainVolumeLastHour: Double?
+
 )

@@ -68,11 +68,16 @@ class WeatherRepositoryImpl @Inject constructor(
             conditionIcon = adjustIconForTime(weather.icon, currentHour),
             condition = weather.main,
             temperature = response.main.temp.toInt(),
-            dayOfWeek = now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+            dayOfWeek = now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("pt", "BR"))
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("pt", "BR")) else it.toString() },
             isDay = isDayTime(currentHour),
             hourlyForecasts = hourlyForecasts,
             maxTemperature = response.main.tempMax.toInt(),
             minTemperature = response.main.tempMin.toInt(),
+            humidity = response.main.humidity,
+            windSpeed = response.wind.speed,
+            rainVolumeLastHour = response.rain?.oneHour,
+
         )
     }
 }

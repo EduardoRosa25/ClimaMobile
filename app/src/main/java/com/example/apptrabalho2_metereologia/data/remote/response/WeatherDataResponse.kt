@@ -22,6 +22,7 @@ data class WeatherDataResponse(
     val name: String,
     val cod: Int,
     var hourlyForecast: List<ForecastItem>? = null
+
 )
 
 @Serializable

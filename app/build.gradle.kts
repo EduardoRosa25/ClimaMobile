@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0") // Lifecycle-runtime-ktx
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
