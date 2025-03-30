@@ -23,7 +23,8 @@ data class WeatherDataResponse(
     val cod: Int,
     var hourlyForecast: List<ForecastItem>? = null,
     val airQuality: AirQualityResponse? = null,
-    val feelsLike: Double? = null
+    val feelsLike: Double? = null,
+    var dailyForecast: List<ForecastItem>? = null
 )
 
 @Serializable

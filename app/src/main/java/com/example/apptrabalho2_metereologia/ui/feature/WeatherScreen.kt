@@ -57,7 +57,11 @@ fun WeatherRoute(
     viewModel: WeatherViewodel = viewModel()
 ) {
     val weatherInfo by viewModel.weatherInfoState.collectAsStateWithLifecycle()
-    WeatherScreen(viewModel = viewModel, context = LocalContext.current, weatherInfo = weatherInfo.weatherInfo)
+    WeatherScreen(
+        viewModel = viewModel,
+        context = LocalContext.current,
+        weatherInfo = weatherInfo.weatherInfo
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -67,7 +71,7 @@ fun WeatherScreen(
     viewModel: WeatherViewodel = viewModel(),
     context: Context = LocalContext.current,
     weatherInfo: WeatherInfo?,
-){
+) {
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
@@ -81,6 +85,7 @@ fun WeatherScreen(
     val isDayTime = weatherInfo?.isDay ?: true
     val currentColorScheme = if (isDayTime) BlueSky else Color.DarkGray
     val scrollState = rememberScrollState()
+    Log.d("WeatherScreen", "WeatherInfo: $weatherInfo")
 
     LaunchedEffect(searchQuery) {
         if (searchQuery.isBlank()) {
@@ -120,7 +125,12 @@ fun WeatherScreen(
                         TextField(
                             value = searchQuery,
                             onValueChange = { newValue -> searchQuery = newValue },
-                            label = { Text("Busca de localização", color = Color.White.copy(alpha = 0.8f)) },
+                            label = {
+                                Text(
+                                    "Busca de localização",
+                                    color = Color.White.copy(alpha = 0.8f)
+                                )
+                            },
                             trailingIcon = {
                                 IconButton(onClick = { focusManager.clearFocus() }) {
                                     Icon(
@@ -164,14 +174,22 @@ fun WeatherScreen(
                                     modifier = Modifier
                                         .width(with(localDensity) { textFieldWidth.toDp() })
                                         .heightIn(max = 300.dp),
-                                    shape = RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp),
+                                    shape = RoundedCornerShape(
+                                        bottomStart = 8.dp,
+                                        bottomEnd = 8.dp
+                                    ),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                                     colors = CardDefaults.cardColors(containerColor = currentColorScheme)
                                 ) {
                                     Column(modifier = Modifier.padding(vertical = 4.dp)) {
                                         if (filteredLocations.isEmpty() && searchQuery.isNotEmpty()) {
                                             DropdownMenuItem(
-                                                text = { Text("Sem resultados", color = Color.White.copy(alpha = 0.7f)) },
+                                                text = {
+                                                    Text(
+                                                        "Sem resultados",
+                                                        color = Color.White.copy(alpha = 0.7f)
+                                                    )
+                                                },
                                                 enabled = false,
                                                 onClick = {},
                                             )
@@ -183,7 +201,10 @@ fun WeatherScreen(
                                                         searchQuery = ""
                                                         expanded = false
                                                         coordinates?.let { nonNullCoords ->
-                                                            viewModel.updateLocation(city, nonNullCoords)
+                                                            viewModel.updateLocation(
+                                                                city,
+                                                                nonNullCoords
+                                                            )
                                                         }
                                                         focusManager.clearFocus()
                                                     },
@@ -203,14 +224,19 @@ fun WeatherScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         cityHistory.take(3).forEach { city ->
                             Button(
                                 onClick = {
                                     searchQuery = ""
-                                    viewModel.updateLocation(city.cityName, city.latitude to city.longitude)
+                                    viewModel.updateLocation(
+                                        city.cityName,
+                                        city.latitude to city.longitude
+                                    )
                                     expanded = false
                                     focusManager.clearFocus()
                                 },
@@ -305,37 +331,6 @@ fun WeatherScreen(
 
                     // ****** Previsão Horária ANTES dos cards ******
                     Spacer(modifier = Modifier.height(32.dp))
-
-                    // --- Hourly Forecast Section ---
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x40000000))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Previsão para as próximas horas",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                        // Log.d("ForecastCheck", "Hourly forecasts count: ${weatherInfo.hourlyForecasts.size}")
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(24.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(weatherInfo.hourlyForecasts) { forecast ->
-                                HourlyForecastItem(forecast = forecast, context = context)
-                            }
-                        }
-                    }
-                    // --- FIM Hourly Forecast ---
-
-                    // ****** Cards de Informação DEPOIS da previsão ******
-                    Spacer(modifier = Modifier.height(24.dp))
-
                     // --- INFO CARDS START ---
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -395,12 +390,60 @@ fun WeatherScreen(
                     // --- INFO CARDS END ---
 
                     Spacer(modifier = Modifier.height(16.dp))
+                    // --- Hourly Forecast Section ---
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x40000000))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Previsão para as próximas horas",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        // Log.d("ForecastCheck", "Hourly forecasts count: ${weatherInfo.hourlyForecasts.size}")
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(weatherInfo.hourlyForecasts) { forecast ->
+                                HourlyForecastItem(forecast = forecast, context = context)
+                            }
+                        }
+                    }
+                    // --- FIM Hourly Forecast ---
 
+                    // ****** Cards de Informação DEPOIS da previsão ******
+                    Spacer(modifier = Modifier.height(24.dp))
+
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0x40000000))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Previsão para os próximos dias",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        DailyForecastList(forecasts = weatherInfo.dailyForecast, context = context)
+                    }
                 } // End Main Column (Scrollable)
             } else {
                 CircularProgressIndicator(color = Color.White)
             }
         } // End Box
+
     } // End Surface
 } // End WeatherScreen
 
@@ -481,6 +524,58 @@ fun HourlyForecastItem(forecast: HourlyForecast, context: Context) {
             contentDescription = forecast.condition,
             modifier = Modifier.size(32.dp)
         )
+        Text(
+            text = "${forecast.temperature}°",
+            color = Color.White,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun DailyForecastList(forecasts: List<HourlyForecast>, context: Context) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(forecasts) { forecast ->
+            DailyForecastItem(forecast, context)
+        }
+    }
+}
+
+@Composable
+fun DailyForecastItem(forecast: HourlyForecast, context: Context) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.width(64.dp)
+    ) {
+        Text(
+            text = forecast.time,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+
+        val iconDrawableResId: Int = try {
+            context.resources.getIdentifier(
+                "weather_${forecast.conditionIcon}",
+                "drawable",
+                context.packageName
+            ).takeIf { it != 0 } ?: R.drawable.weather_01d
+        } catch (e: Exception) {
+            R.drawable.weather_01d
+        }
+
+        Image(
+            painter = painterResource(id = iconDrawableResId),
+            contentDescription = forecast.condition,
+            modifier = Modifier.size(40.dp)
+        )
+
         Text(
             text = "${forecast.temperature}°",
             color = Color.White,

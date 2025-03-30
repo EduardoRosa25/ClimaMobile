@@ -17,5 +17,5 @@ data class WeatherInfo(
     val rainVolumeLastHour: Double?,
     val airQuality: AirQualityResponse? = null,
     val feelsLike: Int,
-
+    val dailyForecast: List<HourlyForecast> = emptyList(),
 )

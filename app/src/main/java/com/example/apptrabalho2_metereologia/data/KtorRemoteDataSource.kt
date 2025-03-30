@@ -41,7 +41,12 @@ class KtorRemoteDataSource @Inject constructor(
             // Atualiza a resposta do tempo atual com a previsão horária
             weatherResponse.copy(
                 airQuality = airQualityResponse,
-                hourlyForecast = forecastResponse.list.take(6)
+                hourlyForecast = forecastResponse.list.take(6),
+                dailyForecast = forecastResponse.list
+                    .groupBy { it.dtTxt.substring(0, 10) }
+                    .mapNotNull { (_, forecasts) ->
+                        forecasts.maxByOrNull { it.main.tempMax }
+                    }
             )
         } catch (e: Exception) {
             Log.e("WeatherAPI", "Erro ao fazer requisição: ${e.message}", e)

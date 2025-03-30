@@ -3,9 +3,9 @@ package com.example.apptrabalho2_metereologia.data.repository
 import com.example.apptrabalho2_metereologia.data.model.HourlyForecast
 import com.example.apptrabalho2_metereologia.data.model.WeatherInfo
 import com.example.apptrabalho2_metereologia.data.remote.RemoteDataSource
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import javax.inject.Inject
@@ -63,6 +63,20 @@ class WeatherRepositoryImpl @Inject constructor(
             )
         }
 
+        val dailyForecasts = response.dailyForecast?.map { forecast ->
+            val forecastDate = LocalDateTime.ofEpochSecond(forecast.dt, 0, ZoneOffset.UTC)
+                .toLocalDate()
+            val dayMonth = forecastDate.format(
+                DateTimeFormatter.ofPattern("d MMM", Locale("pt", "BR"))
+            )
+            HourlyForecast(
+                time = dayMonth.toString(),
+                temperature = forecast.main.temp.toInt(),
+                conditionIcon = forecast.weather[0].icon,
+                condition = forecast.weather[0].main
+            )
+        } ?: emptyList()
+
         return WeatherInfo(
             locationName = response.name,
             conditionIcon = adjustIconForTime(weather.icon, currentHour),
@@ -78,7 +92,8 @@ class WeatherRepositoryImpl @Inject constructor(
             windSpeed = response.wind.speed,
             rainVolumeLastHour = response.rain?.oneHour,
             airQuality = response.airQuality,
-            feelsLike = response.main.feelsLike.toInt()
+            feelsLike = response.main.feelsLike.toInt(),
+            dailyForecast = dailyForecasts
         )
     }
 }
