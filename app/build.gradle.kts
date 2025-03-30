@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") version "1.9.21" // Plugin for serialization
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -56,6 +57,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0") // Lifecycle-runtime-ktx
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation(libs.androidx.room.common)
 
     val ktorVersion = "2.3.7"
     implementation("io.ktor:ktor-client-core:$ktorVersion") //
@@ -63,6 +65,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
 
     implementation("com.google.dagger:hilt-android:2.49") //
     kapt("com.google.dagger:hilt-android-compiler:2.49")
@@ -74,6 +79,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 
 }
 

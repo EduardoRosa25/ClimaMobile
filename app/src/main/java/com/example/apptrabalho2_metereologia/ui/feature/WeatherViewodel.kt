@@ -4,7 +4,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.apptrabalho2_metereologia.data.remote.RemoteDataSource
+import com.example.apptrabalho2_metereologia.data.local.CityEntity
+import com.example.apptrabalho2_metereologia.data.repository.CityRepository
 import com.example.apptrabalho2_metereologia.data.repository.WeatherRepository
 import com.example.apptrabalho2_metereologia.utils.LocationHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,19 +20,48 @@ import javax.inject.Inject
 class WeatherViewodel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val application: Application,
+    private val cityRepository: CityRepository,
 ) : ViewModel() {
 
     private val _weatherInfoState = MutableStateFlow(WeatherInfoState())
     val weatherInfoState: StateFlow<WeatherInfoState> = _weatherInfoState.asStateFlow()
     private val _customLocation = MutableStateFlow<Pair<Float?, Float?>?>(null)
-    fun updateLocation(coordinates: Pair<Float?, Float?>) {
+    fun updateLocation(city: String, coordinates: Pair<Float?, Float?>) {
         _customLocation.value = coordinates
         getWeatherInfo()
+        viewModelScope.launch {
+            try {
+                coordinates.takeIf { it.first != null && it.second != null }?.let { (lat, lon) ->
+                    if (!cityRepository.cityExists(city)) {
+                        cityRepository.insertCity(
+                            CityEntity(
+                                cityName = city,
+                                latitude = lat!!,
+                                longitude = lon!!
+                            )
+                        )
+                        Log.d("ViewModel", "City added: $city")
+                    } else {
+                        Log.d("ViewModel", "City already exists: $city")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error saving city", e)
+            }
+        }
     }
+    private val _cityHistory = MutableStateFlow<List<CityEntity>>(emptyList())
+    val cityHistory: StateFlow<List<CityEntity>> = _cityHistory.asStateFlow()
 
     init {
         Log.d("WeatherViewModel", "Inicializando ViewModel")
         getWeatherInfo()
+        viewModelScope.launch {
+            cityRepository.getLastThreeCities().collect { cities ->
+                _cityHistory.value = cities
+                Log.d("ViewModel", "Stored cities: ${cities.joinToString { it.cityName }}")
+            }
+        }
     }
 
     private fun getWeatherInfo() {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,15 +23,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,6 +59,8 @@ import com.example.apptrabalho2_metereologia.ui.theme.AppTrabalho2MetereologiaTh
 import com.example.apptrabalho2_metereologia.ui.theme.BlueSky
 import com.example.apptrabalho2_metereologia.data.locations
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun WeatherRoute(
@@ -76,8 +81,12 @@ fun WeatherScreen(
     var selectedLocation by remember { mutableStateOf(locations[0]) }
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    val filteredLocations = locations.filter { it.first.contains(searchQuery, ignoreCase = true) }
+    val filteredLocations = locations.filter { location ->
+        location == Pair(null, null) ||
+                location.first.contains(searchQuery, ignoreCase = true)
+    }
     val focusManager = LocalFocusManager.current
+    val cityHistory by viewModel.cityHistory.collectAsStateWithLifecycle()
 
     weatherInfo?.let {
         Surface(
@@ -153,7 +162,7 @@ fun WeatherScreen(
                                     onClick = {
                                         selectedLocation = city to coordinates
                                         expanded = false
-                                        viewModel.updateLocation(coordinates)
+                                        viewModel.updateLocation(city, coordinates)
                                         searchQuery = city
                                     },
                                     modifier = Modifier.background(
@@ -172,6 +181,36 @@ fun WeatherScreen(
                             }
                         }
 
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Search History",
+                        color = Color.White,
+                    )
+                    Row {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        cityHistory.forEach { city ->
+                            Button(
+                                onClick = {
+                                    searchQuery = city.cityName
+                                    viewModel.updateLocation(city.cityName, city.latitude to city.longitude)
+                                },
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .widthIn(max = 125.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0x40000000)
+                                ),
+                            ) {
+                                Text(
+                                    text = city.cityName,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
