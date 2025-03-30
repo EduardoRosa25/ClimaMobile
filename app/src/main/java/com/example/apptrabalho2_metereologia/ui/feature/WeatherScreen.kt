@@ -82,7 +82,7 @@ fun WeatherScreen(
     var expanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     val filteredLocations = locations.filter { location ->
-        location == Pair(null, null) ||
+        location.second == Pair(null, null) ||
                 location.first.contains(searchQuery, ignoreCase = true)
     }
     val focusManager = LocalFocusManager.current
